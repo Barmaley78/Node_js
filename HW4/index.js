@@ -30,7 +30,7 @@ app.get('/users/:id', (req, res) => {
     };
 });
 
-app.post('/users/:id', (req, res) => {
+app.post('/users', (req, res) => {
     const users = JSON.parse(fs.readFileSync(pathDB));
     uniqueID += 1;
 
@@ -38,13 +38,11 @@ app.post('/users/:id', (req, res) => {
         id: uniqueID,
         ...req.body
     });
+
     fs.writeFileSync(pathDB, JSON.stringify(users, null, 2));
     res.send({ id: uniqueID });
 });
 
-app.get('/users', (req, res) => {
-    res.send(fs.readFileSync(pathDB));
-});
 
 app.put('/users/:id', (req, res) => {
     const result = schema.validate(req.body);
@@ -54,13 +52,8 @@ app.put('/users/:id', (req, res) => {
     };
     const users = JSON.parse(fs.readFileSync(pathDB));
     let user = users.find((user) => user.id === Number(req.params.id));
-    // let user = users.find((user) => user.id === Number(req.params.id)); use with coment in if
 
     if (user) {
-        // user = {
-        //     ...user,
-        //     ...req.body
-        // };
         user.firstName = req.body.firstName;
         user.lastName = req.body.lastName;
         user.age = req.body.age;
@@ -74,13 +67,14 @@ app.put('/users/:id', (req, res) => {
 });
 
 app.delete('/users/:id', (req, res) => {
-    const users = JSON.parse(fs.readFileSync(pathDb));
+    const users = JSON.parse(fs.readFileSync(pathDB));
     let user = users.find((user) => user.id === Number(req.params.id));
 
     if (user) {
         const userIndex = users.indexOf(user);
         users.splice(userIndex, 1);
-        fs.writeFileSync(pathDb, JSON.stringify(users, null, 2));
+        fs.writeFileSync(pathDB, JSON.stringify(users, null, 2));
+        res.send({ user });
     } else {
         res.status(404);
         res.send({ user: null });
